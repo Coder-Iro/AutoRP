@@ -1,0 +1,11 @@
+name: AutoRP
+version: '${version}'
+main: xyz.irodev.autorp.AutoRP
+api-version: 1.19
+commands:
+  rpupdate:
+    permission: command.rpupdate
+
+permissions:
+  command.rpupdate:
+    default: op

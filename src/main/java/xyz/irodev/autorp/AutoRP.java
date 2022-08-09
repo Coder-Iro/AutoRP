@@ -67,7 +67,7 @@ public final class AutoRP extends JavaPlugin implements Listener {
                 var content = (new String(new URL(checksumURL).openConnection().getInputStream().readAllBytes())).split(" ");
 
 
-                if (!resourcePackHash.equals(content[0])) {
+                if (resourcePackHash == null || !resourcePackHash.equals(content[0])) {
                     resourcePackURL = MessageFormat.format("http://{0}/{1}", baseURL, content[1]);
                     resourcePackHash = content[0];
                     for (Player player : getServer().getOnlinePlayers()) {

@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.net.URL;
+import java.text.MessageFormat;
 
 public final class AutoRP extends JavaPlugin implements Listener {
     private final File configFile = new File(getDataFolder(), "config.yml");
@@ -33,12 +34,14 @@ public final class AutoRP extends JavaPlugin implements Listener {
         applyResourcePack(config);
 
     }
-    @EventHandler
+
+    @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         var config = YamlConfiguration.loadConfiguration(configFile);
         applyResourcePack(config);
         return true;
     }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         var player = event.getPlayer();
@@ -47,6 +50,7 @@ public final class AutoRP extends JavaPlugin implements Listener {
             player.setResourcePack(resourcePackURL, resourcePackHash, true, resourcePackPrompt);
         }
     }
+
     private void applyResourcePack(FileConfiguration configuration) {
         var baseURL = configuration.getString("baseURL");
         var promptMessage = configuration.getString("prompt");
@@ -59,14 +63,16 @@ public final class AutoRP extends JavaPlugin implements Listener {
 
         if (baseURL != null) {
             try {
-                var checksumURL = baseURL + "checksum.txt";
+                var checksumURL = MessageFormat.format("http://{0}/checksum.txt", baseURL);
                 var content = (new String(new URL(checksumURL).openConnection().getInputStream().readAllBytes())).split(" ");
 
-                resourcePackURL = baseURL + content[1];
-                resourcePackHash = content[0];
 
-                for (Player player : getServer().getOnlinePlayers()) {
-                    player.setResourcePack(resourcePackURL, resourcePackHash, true, resourcePackPrompt);
+                if (!resourcePackHash.equals(content[0])) {
+                    resourcePackURL = MessageFormat.format("http://{0}/{1}", baseURL, content[1]);
+                    resourcePackHash = content[0];
+                    for (Player player : getServer().getOnlinePlayers()) {
+                        player.setResourcePack(resourcePackURL, resourcePackHash, true, resourcePackPrompt);
+                    }
                 }
             } catch (Exception exception) {
                 resourcePackURL = null;

@@ -32,7 +32,7 @@ public final class AutoRP extends JavaPlugin implements Listener {
         saveDefaultConfig();
         var config = getConfig();
         applyResourcePack(config);
-
+        getServer().getPluginManager().registerEvents(this, this);
     }
 
     @Override

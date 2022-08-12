@@ -5,7 +5,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,12 +12,11 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.net.URL;
 import java.text.MessageFormat;
 
 public final class AutoRP extends JavaPlugin implements Listener {
-    private final File configFile = new File(getDataFolder(), "config.yml");
+    private FileConfiguration config;
 
     private String resourcePackURL = null;
     private String resourcePackHash = null;
@@ -30,15 +28,13 @@ public final class AutoRP extends JavaPlugin implements Listener {
     public void onEnable() {
         // Plugin startup logic
         saveDefaultConfig();
-        var config = getConfig();
-        applyResourcePack(config);
+        config = getConfig();
         getServer().getPluginManager().registerEvents(this, this);
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
-        var config = YamlConfiguration.loadConfiguration(configFile);
-        applyResourcePack(config);
+        applyResourcePack();
         return true;
     }
 
@@ -51,9 +47,9 @@ public final class AutoRP extends JavaPlugin implements Listener {
         }
     }
 
-    private void applyResourcePack(FileConfiguration configuration) {
-        var baseURL = configuration.getString("baseURL");
-        var promptMessage = configuration.getString("prompt");
+    private void applyResourcePack() {
+        var baseURL = config.getString("baseURL");
+        var promptMessage = config.getString("prompt");
 
         if (promptMessage != null && !promptMessage.isBlank()) {
             resourcePackPrompt = legacySerializer.deserialize(promptMessage);

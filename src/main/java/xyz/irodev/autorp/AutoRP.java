@@ -30,6 +30,13 @@ public final class AutoRP extends JavaPlugin implements Listener {
         saveDefaultConfig();
         config = getConfig();
         getServer().getPluginManager().registerEvents(this, this);
+
+        var key = config.getString("webhook-key");
+        var port = config.getInt("webhook-port");
+
+        if (key != null) {
+            new GithubWebhookThread(key, port, this::applyResourcePack).start();
+        }
     }
 
     @Override

@@ -1,2 +1,4 @@
 baseURL:
 prompt:
+webhook-port:
+webhook-key:

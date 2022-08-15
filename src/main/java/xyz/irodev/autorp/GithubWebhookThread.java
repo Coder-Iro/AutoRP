@@ -16,6 +16,8 @@ public class GithubWebhookThread extends Thread {
     private final int port;
     private final Runnable runnable;
 
+    private HttpServer server;
+
     public GithubWebhookThread(String key, int port, Runnable runnable) {
         secretKey = new SecretKeySpec(key.getBytes(), "HmacSHA256");
         this.port = port;
@@ -25,7 +27,7 @@ public class GithubWebhookThread extends Thread {
     @Override
     public synchronized void start() {
         try {
-            var server = HttpServer.create(new InetSocketAddress(port), 0);
+            server = HttpServer.create(new InetSocketAddress(port), 0);
 
             server.createContext("/github", exchange -> {
                 try (exchange) {
@@ -60,6 +62,10 @@ public class GithubWebhookThread extends Thread {
         } catch (IOException exception) {
             exception.printStackTrace();
         }
+    }
+
+    public void stopServer() {
+        server.stop(0);
     }
 
     private String hexDigest(byte[] content) throws GeneralSecurityException {

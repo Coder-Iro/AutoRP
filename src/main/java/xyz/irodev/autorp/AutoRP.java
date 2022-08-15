@@ -22,6 +22,8 @@ public final class AutoRP extends JavaPlugin implements Listener {
     private String resourcePackHash = null;
     private Component resourcePackPrompt = null;
 
+    private GithubWebhookThread webhookThread = null;
+
     private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
 
     @Override
@@ -35,8 +37,14 @@ public final class AutoRP extends JavaPlugin implements Listener {
         var port = config.getInt("webhook-port");
 
         if (key != null) {
-            new GithubWebhookThread(key, port, this::applyResourcePack).start();
+            webhookThread = new GithubWebhookThread(key, port, this::applyResourcePack);
+            webhookThread.start();
         }
+    }
+
+    @Override
+    public void onDisable() {
+        webhookThread.stopServer();
     }
 
     @Override

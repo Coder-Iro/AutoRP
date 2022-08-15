@@ -12,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 import java.io.BufferedInputStream;
 import java.net.URL;
@@ -20,15 +21,13 @@ import java.security.MessageDigest;
 import java.text.MessageFormat;
 
 public final class AutoRP extends JavaPlugin implements Listener {
+    private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
     private FileConfiguration config;
-
+    private final Logger logger = getSLF4JLogger();
     private String resourcePackURL = null;
     private String resourcePackHash = null;
     private Component resourcePackPrompt = null;
-
     private GithubWebhookThread webhookThread = null;
-
-    private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
 
     @Override
     public void onEnable() {
@@ -67,6 +66,8 @@ public final class AutoRP extends JavaPlugin implements Listener {
     }
 
     private void applyResourcePack() {
+        logger.info("ResourcePack update triggered");
+
         var baseURL = config.getString("baseURL");
         var promptMessage = config.getString("prompt");
 
@@ -89,13 +90,13 @@ public final class AutoRP extends JavaPlugin implements Listener {
                     // check sha1
                     var digest = MessageDigest.getInstance("SHA-1");
 
-                    try (var input = new URL(resourcePackURL).openStream();
-                         var bis = new BufferedInputStream(input);
-                         var dis = new DigestInputStream(bis, digest)
+                    try (
+                            var input = new URL(resourcePackURL).openStream();
+                            var bis = new BufferedInputStream(input);
+                            var dis = new DigestInputStream(bis, digest)
                     ) {
                         //noinspection StatementWithEmptyBody
-                        while (dis.read() != -1) {
-                        }
+                        while (dis.read() != -1) ;
 
                         var hash = digest.digest();
 
@@ -104,16 +105,15 @@ public final class AutoRP extends JavaPlugin implements Listener {
                                 player.setResourcePack(resourcePackURL, resourcePackHash, true, resourcePackPrompt);
                             }
                         } else {
-                            getSLF4JLogger().warn("SHA1 mismatch");
+                            logger.warn("SHA1 mismatch");
                         }
                     }
-                }
+                } else logger.warn("Resourcepack doesn't changed. Reject resourcepack update");
             } catch (Exception exception) {
                 resourcePackURL = null;
                 resourcePackHash = null;
-
-                exception.printStackTrace();
+                logger.error("Exception occurred in applyResourcePack", exception);
             }
-        }
+        } else logger.warn("baseURL is null");
     }
 }

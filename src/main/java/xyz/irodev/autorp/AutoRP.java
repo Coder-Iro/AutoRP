@@ -1,5 +1,6 @@
 package xyz.irodev.autorp;
 
+import at.favre.lib.bytes.Bytes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.Command;
@@ -12,7 +13,10 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedInputStream;
 import java.net.URL;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
 import java.text.MessageFormat;
 
 public final class AutoRP extends JavaPlugin implements Listener {
@@ -81,8 +85,27 @@ public final class AutoRP extends JavaPlugin implements Listener {
                 if (resourcePackHash == null || !resourcePackHash.equals(content[0])) {
                     resourcePackURL = MessageFormat.format("http://{0}/{1}", baseURL, content[1]);
                     resourcePackHash = content[0];
-                    for (Player player : getServer().getOnlinePlayers()) {
-                        player.setResourcePack(resourcePackURL, resourcePackHash, true, resourcePackPrompt);
+
+                    // check sha1
+                    var digest = MessageDigest.getInstance("SHA-1");
+
+                    try (var input = new URL(resourcePackURL).openStream();
+                         var bis = new BufferedInputStream(input);
+                         var dis = new DigestInputStream(bis, digest)
+                    ) {
+                        //noinspection StatementWithEmptyBody
+                        while (dis.read() != -1) {
+                        }
+
+                        var hash = digest.digest();
+
+                        if (MessageDigest.isEqual(hash, Bytes.parseHex(resourcePackHash).array())) {
+                            for (Player player : getServer().getOnlinePlayers()) {
+                                player.setResourcePack(resourcePackURL, resourcePackHash, true, resourcePackPrompt);
+                            }
+                        } else {
+                            getSLF4JLogger().warn("SHA1 mismatch");
+                        }
                     }
                 }
             } catch (Exception exception) {

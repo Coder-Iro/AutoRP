@@ -19,6 +19,7 @@ repositories {
 
 dependencies {
     compileOnly 'io.papermc.paper:paper-api:1.19.2-R0.1-SNAPSHOT'
+    implementation 'at.favre.lib:bytes:1.5.0'
 }
 
 def targetJavaVersion = 17

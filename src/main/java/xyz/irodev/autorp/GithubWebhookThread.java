@@ -1,5 +1,6 @@
 package xyz.irodev.autorp;
 
+import at.favre.lib.bytes.Bytes;
 import com.sun.net.httpserver.HttpServer;
 
 import javax.crypto.Mac;
@@ -66,13 +67,6 @@ public class GithubWebhookThread extends Thread {
         mac.init(secretKey);
         var bytes = mac.doFinal(content);
 
-        StringBuilder builder = new StringBuilder();
-        builder.append("sha256=");
-
-        for (byte data : bytes) {
-            builder.append(String.format("%02x", data));
-        }
-
-        return builder.toString();
+        return "sha256=" + Bytes.wrap(bytes).encodeHex();
     }
 }

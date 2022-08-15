@@ -9,3 +9,6 @@ commands:
 permissions:
   command.rpupdate:
     default: op
+
+libraries:
+  - at.favre.lib:bytes:1.5.0

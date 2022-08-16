@@ -81,7 +81,7 @@ public final class AutoRP extends JavaPlugin implements Listener {
         if (baseURL != null) {
             try {
                 var checksumURL = MessageFormat.format("http://{0}/checksum.txt", baseURL);
-                var content = (new String(new URL(checksumURL).openConnection().getInputStream().readAllBytes())).split(" ");
+                var content = (new String(new URL(checksumURL).openConnection().getInputStream().readAllBytes())).stripTrailing().split(" ");
 
 
                 if (resourcePackHash == null || !resourcePackHash.equals(content[0])) {

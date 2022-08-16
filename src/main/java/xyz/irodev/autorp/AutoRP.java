@@ -35,6 +35,7 @@ public final class AutoRP extends JavaPlugin implements Listener {
         saveDefaultConfig();
         config = getConfig();
         getServer().getPluginManager().registerEvents(this, this);
+        applyResourcePack();
 
         var key = config.getString("webhook-key");
         var port = config.getInt("webhook-port");
@@ -104,6 +105,7 @@ public final class AutoRP extends JavaPlugin implements Listener {
                             for (Player player : getServer().getOnlinePlayers()) {
                                 player.setResourcePack(resourcePackURL, resourcePackHash, true, resourcePackPrompt);
                             }
+                            logger.info("Resourcepack successfully updated");
                         } else {
                             logger.warn("SHA1 mismatch");
                         }

@@ -85,7 +85,7 @@ public final class AutoRP extends JavaPlugin implements Listener {
 
 
                 if (resourcePackHash == null || !resourcePackHash.equals(content[0])) {
-                    resourcePackURL = MessageFormat.format("http://{0}/{1}", baseURL, content[1]);
+                    resourcePackURL = MessageFormat.format("http://{0}/{1}?hash={2}", baseURL, content[1], content[0]);
                     resourcePackHash = content[0];
 
                     // check sha1

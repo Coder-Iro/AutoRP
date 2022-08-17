@@ -24,6 +24,8 @@ public final class AutoRP extends JavaPlugin implements Listener {
     private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
     private FileConfiguration config;
     private final Logger logger = getSLF4JLogger();
+    private final MessageFormat checksumURLformat = new MessageFormat("http://{0}/checksum.txt");
+    private final MessageFormat packURLformat = new MessageFormat("http://{0}/{1}?hash={2}");
     private String resourcePackURL = null;
     private String resourcePackHash = null;
     private Component resourcePackPrompt = null;
@@ -80,14 +82,16 @@ public final class AutoRP extends JavaPlugin implements Listener {
 
         if (baseURL != null) {
             try {
-                var checksumURL = MessageFormat.format("http://{0}/checksum.txt", baseURL);
-                var content = (new String(new URL(checksumURL).openConnection().getInputStream().readAllBytes())).stripTrailing().split(" ");
+                var checksumURL = checksumURLformat.format(baseURL);
+                var metadata = new String(new URL(checksumURL).openConnection().getInputStream().readAllBytes());
+                var newPackHash = metadata.substring(0, 40);
+                var newPackName = metadata.substring(40).strip();
 
 
-                if (resourcePackHash == null || !resourcePackHash.equals(content[0])) {
-                    resourcePackURL = MessageFormat.format("http://{0}/{1}?hash={2}", baseURL, content[1], content[0]);
+                if (resourcePackHash == null || !resourcePackHash.equals(newPackHash)) {
+                    resourcePackURL = packURLformat.format(new String[]{baseURL, newPackName, newPackHash});
                     logger.info("URL: " + resourcePackURL);
-                    resourcePackHash = content[0];
+                    resourcePackHash = newPackHash;
 
                     // check sha1
                     var digest = MessageDigest.getInstance("SHA-1");
